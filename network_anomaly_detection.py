@@ -19,19 +19,19 @@ tf.random.set_seed(42)
 
 class NetworkAnomalyDetector:
     def __init__(self):
-        self.scaler = StandardScaler()
-        self.label_encoders = {}
-        self.isolation_forest = None
-        self.autoencoder = None
-        self.encoder = None
-        self.feature_names = None
+        self.scaler=StandardScaler()
+        self.label_encoders={}
+        self.isolation_forest=None
+        self.autoencoder=None
+        self.encoder=None
+        self.feature_names=None
         
     def load_and_preprocess_data(self, file_path=None):
         """
         Load and preprocess KDD Cup 1999 dataset
         """
         # KDD Cup 1999 column names
-        column_names = [
+        column_names=[
             'duration', 'protocol_type', 'service', 'flag', 'src_bytes', 'dst_bytes',
             'land', 'wrong_fragment', 'urgent', 'hot', 'num_failed_logins',
             'logged_in', 'num_compromised', 'root_shell', 'su_attempted',
@@ -49,10 +49,10 @@ class NetworkAnomalyDetector:
         # If no file path provided, create sample data for demonstration
         if file_path is None:
             print("Creating sample data for demonstration...")
-            data = self._create_sample_data()
+            data=self._create_sample_data()
         else:
             print(f"Loading data from {file_path}...")
-            data = pd.read_csv(file_path, names=column_names)
+            data=pd.read_csv(file_path, names=column_names)
         
         print(f"Dataset shape: {data.shape}")
         print(f"Columns: {data.columns.tolist()}")
@@ -62,7 +62,7 @@ class NetworkAnomalyDetector:
         print(data['label'].value_counts())
         
         # Create binary labels: normal vs anomaly
-        data['is_anomaly'] = (data['label'] != 'normal.').astype(int)
+        data['is_anomaly']=(data['label'] != 'normal.').astype(int)
         
         return data
     
@@ -71,10 +71,10 @@ class NetworkAnomalyDetector:
         Create sample network traffic data for demonstration
         """
         np.random.seed(42)
-        n_samples = 10000
+        n_samples=10000
         
         # Generate normal traffic patterns
-        normal_data = {
+        normal_data={
             'duration': np.random.exponential(2, n_samples),
             'protocol_type': np.random.choice(['tcp', 'udp', 'icmp'], n_samples, p=[0.7, 0.2, 0.1]),
             'service': np.random.choice(['http', 'ftp', 'smtp', 'dns', 'ssh'], n_samples),
@@ -120,10 +120,10 @@ class NetworkAnomalyDetector:
         }
         
         # Generate anomalous traffic patterns (10% of data)
-        n_anomalies = int(n_samples * 0.1)
-        anomaly_types = ['dos.', 'probe.', 'r2l.', 'u2r.']
+        n_anomalies=int(n_samples * 0.1)
+        anomaly_types=['dos.', 'probe.', 'r2l.', 'u2r.']
         
-        anomaly_data = {
+        anomaly_data={
             'duration': np.random.exponential(10, n_anomalies),  # Longer durations
             'protocol_type': np.random.choice(['tcp', 'udp', 'icmp'], n_anomalies),
             'service': np.random.choice(['http', 'ftp', 'smtp', 'dns', 'ssh'], n_anomalies),
@@ -169,13 +169,13 @@ class NetworkAnomalyDetector:
         }
         
         # Combine normal and anomalous data
-        combined_data = {}
+        combined_data={}
         for key in normal_data.keys():
-            combined_data[key] = np.concatenate([normal_data[key], anomaly_data[key]])
+            combined_data[key]=np.concatenate([normal_data[key], anomaly_data[key]])
         
         # Create DataFrame and shuffle
-        df = pd.DataFrame(combined_data)
-        df = df.sample(frac=1).reset_index(drop=True)
+        df=pd.DataFrame(combined_data)
+        df=df.sample(frac=1).reset_index(drop=True)
         
         return df
     
@@ -184,25 +184,25 @@ class NetworkAnomalyDetector:
         Preprocess features for machine learning
         """
         # Separate features and labels
-        X = data.drop(['label', 'is_anomaly'], axis=1)
-        y = data['is_anomaly']
+        X=data.drop(['label', 'is_anomaly'], axis=1)
+        y=data['is_anomaly']
         
         # Handle categorical variables
-        categorical_cols = ['protocol_type', 'service', 'flag']
+        categorical_cols=['protocol_type', 'service', 'flag']
         
         for col in categorical_cols:
             if col in X.columns:
                 if col not in self.label_encoders:
-                    self.label_encoders[col] = LabelEncoder()
-                    X[col] = self.label_encoders[col].fit_transform(X[col])
+                    self.label_encoders[col]=LabelEncoder()
+                    X[col]=self.label_encoders[col].fit_transform(X[col])
                 else:
-                    X[col] = self.label_encoders[col].transform(X[col])
+                    X[col]=self.label_encoders[col].transform(X[col])
         
         # Store feature names
-        self.feature_names = X.columns.tolist()
+        self.feature_names=X.columns.tolist()
         
         # Scale features
-        X_scaled = self.scaler.fit_transform(X)
+        X_scaled=self.scaler.fit_transform(X)
         
         return X_scaled, y
     
@@ -211,7 +211,7 @@ class NetworkAnomalyDetector:
         Train Isolation Forest for anomaly detection
         """
         print("Training Isolation Forest...")
-        self.isolation_forest = IsolationForest(
+        self.isolation_forest=IsolationForest(
             n_estimators=100,
             contamination=contamination,
             random_state=42,
@@ -227,21 +227,21 @@ class NetworkAnomalyDetector:
         print("Building Autoencoder...")
         
         # Input layer
-        input_layer = Input(shape=(input_dim,))
+        input_layer=Input(shape=(input_dim,))
         
         # Encoder
-        encoded = Dense(64, activation='relu')(input_layer)
-        encoded = Dense(encoding_dim, activation='relu')(encoded)
+        encoded=Dense(64, activation='relu')(input_layer)
+        encoded=Dense(encoding_dim, activation='relu')(encoded)
         
         # Decoder
-        decoded = Dense(64, activation='relu')(encoded)
-        decoded = Dense(input_dim, activation='linear')(decoded)
+        decoded=Dense(64, activation='relu')(encoded)
+        decoded=Dense(input_dim, activation='linear')(decoded)
         
         # Autoencoder model
-        autoencoder = Model(input_layer, decoded)
+        autoencoder=Model(input_layer, decoded)
         
         # Encoder model
-        encoder = Model(input_layer, encoded)
+        encoder=Model(input_layer, encoded)
         
         # Compile
         autoencoder.compile(optimizer=Adam(learning_rate=0.001), 
@@ -257,10 +257,10 @@ class NetworkAnomalyDetector:
         print("Training Autoencoder...")
         
         # Build autoencoder
-        self.autoencoder, self.encoder = self.build_autoencoder(X_normal.shape[1])
+        self.autoencoder, self.encoder=self.build_autoencoder(X_normal.shape[1])
         
         # Train on normal data only
-        history = self.autoencoder.fit(
+        history=self.autoencoder.fit(
             X_normal, X_normal,
             epochs=epochs,
             batch_size=batch_size,
@@ -277,13 +277,13 @@ class NetworkAnomalyDetector:
         Predict anomalies using Isolation Forest
         """
         # Predict (-1 for anomalies, 1 for normal)
-        predictions = self.isolation_forest.predict(X)
+        predictions=self.isolation_forest.predict(X)
         
         # Convert to binary (1 for anomalies, 0 for normal)
-        binary_predictions = (predictions == -1).astype(int)
+        binary_predictions=(predictions == -1).astype(int)
         
         # Get anomaly scores
-        anomaly_scores = self.isolation_forest.decision_function(X)
+        anomaly_scores=self.isolation_forest.decision_function(X)
         
         return binary_predictions, anomaly_scores
     
@@ -292,17 +292,17 @@ class NetworkAnomalyDetector:
         Predict anomalies using Autoencoder
         """
         # Reconstruct data
-        reconstructed = self.autoencoder.predict(X)
+        reconstructed=self.autoencoder.predict(X)
         
         # Calculate reconstruction error
-        reconstruction_error = np.mean(np.square(X - reconstructed), axis=1)
+        reconstruction_error=np.mean(np.square(X - reconstructed), axis=1)
         
         # Set threshold if not provided
         if threshold is None:
-            threshold = np.percentile(reconstruction_error, 95)
+            threshold=np.percentile(reconstruction_error, 95)
         
         # Binary predictions
-        binary_predictions = (reconstruction_error > threshold).astype(int)
+        binary_predictions=(reconstruction_error > threshold).astype(int)
         
         return binary_predictions, reconstruction_error, threshold
     
@@ -318,7 +318,7 @@ class NetworkAnomalyDetector:
         print(classification_report(y_true, y_pred))
         
         # Confusion matrix
-        cm = confusion_matrix(y_true, y_pred)
+        cm=confusion_matrix(y_true, y_pred)
         plt.figure(figsize=(8, 6))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
         plt.title(f'{model_name} - Confusion Matrix')
@@ -327,11 +327,11 @@ class NetworkAnomalyDetector:
         plt.show()
         
         # ROC curve
-        fpr, tpr, _ = roc_curve(y_true, scores)
-        auc_score = roc_auc_score(y_true, scores)
+        fpr, tpr, _=roc_curve(y_true, scores)
+        auc_score=roc_auc_score(y_true, scores)
         
         plt.figure(figsize=(8, 6))
-        plt.plot(fpr, tpr, label=f'{model_name} (AUC = {auc_score:.3f})')
+        plt.plot(fpr, tpr, label=f'{model_name} (AUC={auc_score:.3f})')
         plt.plot([0, 1], [0, 1], 'k--')
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
@@ -349,26 +349,26 @@ class NetworkAnomalyDetector:
         
         # Sample data for faster computation
         if len(X) > n_samples:
-            indices = np.random.choice(len(X), n_samples, replace=False)
-            X_sample = X[indices]
+            indices=np.random.choice(len(X), n_samples, replace=False)
+            X_sample=X[indices]
         else:
-            X_sample = X
+            X_sample=X
         
         # Calculate baseline scores
-        baseline_scores = self.isolation_forest.decision_function(X_sample)
+        baseline_scores=self.isolation_forest.decision_function(X_sample)
         
         # Calculate importance by permuting each feature
-        importances = []
+        importances=[]
         for i in range(X_sample.shape[1]):
-            X_permuted = X_sample.copy()
-            X_permuted[:, i] = np.random.permutation(X_permuted[:, i])
+            X_permuted=X_sample.copy()
+            X_permuted[:, i]=np.random.permutation(X_permuted[:, i])
             
-            permuted_scores = self.isolation_forest.decision_function(X_permuted)
-            importance = np.mean(np.abs(baseline_scores - permuted_scores))
+            permuted_scores=self.isolation_forest.decision_function(X_permuted)
+            importance=np.mean(np.abs(baseline_scores - permuted_scores))
             importances.append(importance)
         
         # Create feature importance DataFrame
-        importance_df = pd.DataFrame({
+        importance_df=pd.DataFrame({
             'feature': feature_names,
             'importance': importances
         }).sort_values('importance', ascending=False)
@@ -390,15 +390,15 @@ class NetworkAnomalyDetector:
         # Create 2D projection using first two principal components
         from sklearn.decomposition import PCA
         
-        pca = PCA(n_components=2)
-        X_2d = pca.fit_transform(X)
+        pca=PCA(n_components=2)
+        X_2d=pca.fit_transform(X)
         
         # Create scatter plot
         plt.figure(figsize=(12, 5))
         
         # Plot 1: True vs Predicted
         plt.subplot(1, 2, 1)
-        colors = ['blue' if pred == 0 else 'red' for pred in y_pred]
+        colors=['blue' if pred == 0 else 'red' for pred in y_pred]
         plt.scatter(X_2d[:, 0], X_2d[:, 1], c=colors, alpha=0.6, s=20)
         plt.title(f'{model_name} - Predicted Anomalies\n(Blue: Normal, Red: Anomaly)')
         plt.xlabel('First Principal Component')
@@ -406,7 +406,7 @@ class NetworkAnomalyDetector:
         
         # Plot 2: Anomaly scores
         plt.subplot(1, 2, 2)
-        scatter = plt.scatter(X_2d[:, 0], X_2d[:, 1], c=scores, alpha=0.6, s=20, cmap='viridis')
+        scatter=plt.scatter(X_2d[:, 0], X_2d[:, 1], c=scores, alpha=0.6, s=20, cmap='viridis')
         plt.colorbar(scatter)
         plt.title(f'{model_name} - Anomaly Scores')
         plt.xlabel('First Principal Component')
@@ -423,16 +423,16 @@ class NetworkAnomalyDetector:
         print("=" * 60)
         
         # Load and preprocess data
-        data = self.load_and_preprocess_data(file_path)
-        X, y = self.preprocess_features(data)
+        data=self.load_and_preprocess_data(file_path)
+        X, y=self.preprocess_features(data)
         
         # Split data
-        X_train, X_test, y_train, y_test = train_test_split(
+        X_train, X_test, y_train, y_test=train_test_split(
             X, y, test_size=0.3, random_state=42, stratify=y
         )
         
         # Get normal data for autoencoder training
-        X_normal = X_train[y_train == 0]
+        X_normal=X_train[y_train == 0]
         
         print(f"\nDataset split:")
         print(f"Training set: {X_train.shape[0]} samples")
@@ -447,13 +447,13 @@ class NetworkAnomalyDetector:
         self.train_isolation_forest(X_train, contamination=0.1)
         
         # Predict on test set
-        if_predictions, if_scores = self.predict_isolation_forest(X_test)
+        if_predictions, if_scores=self.predict_isolation_forest(X_test)
         
         # Evaluate Isolation Forest
-        if_auc = self.evaluate_model(y_test, if_predictions, -if_scores, "Isolation Forest")
+        if_auc=self.evaluate_model(y_test, if_predictions, -if_scores, "Isolation Forest")
         
         # Feature importance
-        if_importance = self.feature_importance_isolation_forest(X_test, self.feature_names)
+        if_importance=self.feature_importance_isolation_forest(X_test, self.feature_names)
         
         # Visualize results
         self.visualize_anomalies(X_test, y_test, if_predictions, -if_scores, "Isolation Forest")
@@ -464,7 +464,7 @@ class NetworkAnomalyDetector:
         print("="*60)
         
         # Train autoencoder
-        ae_history = self.train_autoencoder(X_normal, epochs=50, batch_size=64)
+        ae_history=self.train_autoencoder(X_normal, epochs=50, batch_size=64)
         
         # Plot training history
         plt.figure(figsize=(12, 4))
@@ -487,12 +487,12 @@ class NetworkAnomalyDetector:
         plt.show()
         
         # Predict on test set
-        ae_predictions, ae_scores, ae_threshold = self.predict_autoencoder(X_test)
+        ae_predictions, ae_scores, ae_threshold=self.predict_autoencoder(X_test)
         
         print(f"Autoencoder threshold: {ae_threshold:.4f}")
         
         # Evaluate Autoencoder
-        ae_auc = self.evaluate_model(y_test, ae_predictions, ae_scores, "Autoencoder")
+        ae_auc=self.evaluate_model(y_test, ae_predictions, ae_scores, "Autoencoder")
         
         # Visualize results
         self.visualize_anomalies(X_test, y_test, ae_predictions, ae_scores, "Autoencoder")
@@ -502,7 +502,7 @@ class NetworkAnomalyDetector:
         print("MODEL COMPARISON")
         print("="*60)
         
-        comparison_df = pd.DataFrame({
+        comparison_df=pd.DataFrame({
             'Model': ['Isolation Forest', 'Autoencoder'],
             'AUC Score': [if_auc, ae_auc],
             'Precision (Anomaly)': [
@@ -524,9 +524,9 @@ class NetworkAnomalyDetector:
         
         # Plot comparison
         plt.figure(figsize=(10, 6))
-        metrics = ['AUC Score', 'Precision (Anomaly)', 'Recall (Anomaly)', 'F1-Score (Anomaly)']
-        x = np.arange(len(metrics))
-        width = 0.35
+        metrics=['AUC Score', 'Precision (Anomaly)', 'Recall (Anomaly)', 'F1-Score (Anomaly)']
+        x=np.arange(len(metrics))
+        width=0.35
         
         plt.bar(x - width/2, comparison_df.iloc[0, 1:], width, label='Isolation Forest', alpha=0.8)
         plt.bar(x + width/2, comparison_df.iloc[1, 1:], width, label='Autoencoder', alpha=0.8)
@@ -545,13 +545,13 @@ class NetworkAnomalyDetector:
         print("="*60)
         
         # Analyze detected anomalies
-        anomaly_indices = np.where(if_predictions == 1)[0]
+        anomaly_indices=np.where(if_predictions == 1)[0]
         
         if len(anomaly_indices) > 0:
             print(f"\nIsolation Forest detected {len(anomaly_indices)} anomalies")
             
             # Show some examples of detected anomalies
-            anomaly_samples = X_test[anomaly_indices[:5]]  # First 5 anomalies
+            anomaly_samples=X_test[anomaly_indices[:5]]  # First 5 anomalies
             
             print("\nTop 5 detected anomalies (feature values):")
             for i, sample in enumerate(anomaly_samples):
@@ -569,10 +569,10 @@ class NetworkAnomalyDetector:
 # Main execution
 if __name__ == "__main__":
     # Initialize detector
-    detector = NetworkAnomalyDetector()
+    detector=NetworkAnomalyDetector()
     
     
-    results = detector.run_complete_analysis()
+    results=detector.run_complete_analysis()
     
     print("\nAnalysis completed successfully!")
     print("Key findings:")
